@@ -95,24 +95,34 @@ python scripts/demo.py    # spins up a real 3-node cluster, kills the
                            # leader mid-flight, shows the failover live
 ```
 
-Sample output from `scripts/demo.py`:
+Sample output from `scripts/demo.py` (which node wins each election is
+randomized — ports and the elected leader/pid will vary run to run, but the
+shape is always the same):
 
 ```
+[n2] listening on 127.0.0.1:8002, peers=['n1', 'n3']
+[n3] listening on 127.0.0.1:8003, peers=['n1', 'n2']
+[n1] listening on 127.0.0.1:8001, peers=['n2', 'n3']
 == starting 3-node cluster ==
-leader elected: n3 (127.0.0.1:8003)
+leader elected: n1 (127.0.0.1:8001)
 
 == writing foo=bar through the leader ==
 PUT foo=bar -> {'ok': True, 'result': {'ok': True}}
 
-== killing the leader (n3, pid 889) ==
+== reading it back from the leader ==
+GET foo -> {'ok': True, 'value': 'bar'}
+
+== killing the leader (n1, pid 37139) ==
 waiting for the remaining nodes to elect a new leader...
-new leader elected: n2
+new leader elected: n3
 
 == writing another key through the new leader ==
 PUT after_failover=42 -> {'ok': True, 'result': {'ok': True}}
 GET foo (written before the crash) -> {'ok': True, 'value': 'bar'}
 
 == demo complete: no data was lost across the leader failure ==
+
+shutting down remaining nodes...
 ```
 
 ### Running your own cluster by hand
